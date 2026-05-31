@@ -17,13 +17,12 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # DATABASE CONNECTION
-conn = psycopg2.connect(
-    host="127.0.0.1",
-    database="testdb",
-    user="postgres",
-    password="Rodron30",
-    port="5432"
-)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+conn = psycopg2.connect(DATABASE_URL)
+conn.autocommit = True
+
+cur = conn.cursor()
 
 conn.autocommit = True
 
