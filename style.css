@@ -1,0 +1,87 @@
+/* BODY */
+body {
+    background: #0f172a;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 250px;
+    min-height: 100vh;
+    background: linear-gradient(
+        180deg,
+        #111827,
+        #1e293b
+    );
+}
+
+.sidebar .nav-link {
+    border-radius: 10px;
+    padding: 12px;
+    transition: 0.3s;
+}
+
+.sidebar .nav-link:hover {
+    background: #2563eb;
+    color: white !important;
+}
+
+/* CARDS */
+.card {
+    border: none !important;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    transition: 0.3s;
+}
+
+/* TABLE */
+.table {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.table thead {
+    background: #1e293b;
+}
+
+.table tbody tr:hover {
+    background: rgba(59,130,246,0.2);
+}
+
+/* BUTTONS */
+.btn-primary {
+    background: #2563eb;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.btn-warning {
+    color: white;
+}
+
+/* SEARCH */
+.form-control {
+    border-radius: 10px;
+}
+
+/* PRODUCT IMAGE */
+.product-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid #334155;
+}
+
+/* CHART */
+canvas {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+}
