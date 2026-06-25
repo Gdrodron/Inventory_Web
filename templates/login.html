@@ -1,19 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!DOCTYPE html>
-<html>
 
-<head>
-
-    <title>Login</title>
+    <title>Inventory System | Login</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-
         body{
             background:#1e252f;
             color:white;
@@ -26,10 +22,9 @@
             background:#808891;
             padding:40px;
             border-radius:10px;
+            box-shadow:0 10px 30px rgba(0,0,0,.25);
         }
-
     </style>
-
 </head>
 
 <body>
@@ -39,6 +34,12 @@
     <h1 class="text-center mb-4">
         🔐 Login
     </h1>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+    {% endif %}
 
     <form method="POST">
 
@@ -51,7 +52,7 @@
                 name="username"
                 class="form-control"
                 placeholder="Enter your username"
-                title="Username"
+                required
             >
         </div>
 
@@ -64,14 +65,31 @@
                 name="password"
                 class="form-control"
                 placeholder="Enter your password"
-                title="Password"
+                required
             >
         </div>
 
         <button type="submit" class="btn btn-primary w-100">
             Login
         </button>
+
     </form>
+
+    <div class="alert alert-light border mt-4 text-center">
+        <small class="text-muted d-block mb-2">
+            Demo Access
+        </small>
+
+        <span class="badge bg-dark">
+            admin
+        </span>
+
+        <span class="mx-2">/</span>
+
+        <span class="badge bg-secondary">
+            admin123
+        </span>
+    </div>
 
 </div>
 

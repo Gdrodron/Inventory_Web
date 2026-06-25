@@ -85,95 +85,114 @@
 
     <form method="POST" enctype="multipart/form-data">
 
-        <div class="mb-3">
+    <!-- CURRENT IMAGE -->
+    <div class="text-center mb-4">
+        <img
+            src="{{ url_for('static', filename='uploads/' ~ (product[3] or 'default.png')) }}"
+            class="preview-img"
+            alt="Product Image"
+        >
+    </div>
 
-            <label for="product_name" class="form-label">
-                Product Name
-            </label>
+    <!-- CHANGE IMAGE -->
+    <div class="mb-4">
 
-            <input
-                id="product_name"
-                type="text"
-                name="product_name"
-                class="form-control"
-                value="{{ product[1] }}"
-                placeholder="Enter product name"
-                required
-            >
+        <label class="form-label">
+            Change Product Image
+        </label>
 
-        </div>
+        <input
+            type="file"
+            name="image"
+            class="form-control"
+            accept="image/*"
+        >
 
-        <div class="mb-3">
+        <small class="text-secondary">
+            Leave blank if you don't want to change the image.
+        </small>
 
-            <label for="price" class="form-label">
-                Price
-            </label>
+    </div>
 
-            <input
-                id="price"
-                type="number"
-                step="0.01"
-                min="0"
-                name="price"
-                class="form-control"
-                value="{{ product[2] }}"
-                placeholder="Enter price"
-                required
-            >
+    <!-- PRODUCT NAME -->
+    <div class="mb-3">
 
-        </div>
+        <label for="product_name" class="form-label">
+            Product Name
+        </label>
 
-        <div class="mb-3">
-            
-            <label class="form-label">Quantity</label>
+        <input
+            id="product_name"
+            type="text"
+            name="product_name"
+            class="form-control"
+            value="{{ product[1] }}"
+            required
+        >
 
-            <input
-                id="quantity"
-                type="number"
-                name="quantity"
-                class="form-control"
-                value="{{ product[4] }}"
-                min="0"
-                required
-            >
-        </div>    
+    </div>
 
+    <!-- PRICE -->
+    <div class="mb-3">
 
-        <div class="mb-4">
+        <label for="price" class="form-label">
+            Price
+        </label>
 
-            <label for="image" class="form-label">
-                Product Image
-            </label>
+        <input
+            id="price"
+            type="number"
+            step="0.01"
+            min="0"
+            name="price"
+            class="form-control"
+            value="{{ product[2] }}"
+            required
+        >
 
-            <input
-                id="image"
-                type="file"
-                name="image"
-                class="form-control"
-                accept="image/*"
-            >
+    </div>
 
-            <small class="text-secondary">
-                Leave blank if you don't want to change the image.
-            </small>
+    <!-- QUANTITY -->
+    <div class="mb-4">
 
-        </div>
+        <label for="quantity" class="form-label">
+            Quantity
+        </label>
 
-        <div class="d-flex gap-2">
+        <input
+            id="quantity"
+            type="number"
+            min="0"
+            name="quantity"
+            class="form-control"
+            value="{{ product[4] }}"
+            required
+        >
 
-            <button type="submit" class="btn btn-warning">
-                ✏️ Update Product
-            </button>
+    </div>
 
-            <a href="/" class="btn btn-light">
-                ← Back
-            </a>
+    <!-- BUTTONS -->
+    <div class="d-flex gap-2">
 
-        </div>
+        <button
+            type="submit"
+            class="btn btn-warning"
+        >
+            ✏️ Update Product
+        </button>
 
-    </form>
+        <a
+            href="/"
+            class="btn btn-light"
+        >
+            ← Back
+        </a>
+
+    </div>
+
+</form>
 
 </div>
 
 </body>
-</html>
+

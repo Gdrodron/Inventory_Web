@@ -1,5 +1,3 @@
-from unicodedata import category
-
 from flask import Flask, render_template, request, redirect, session
 from werkzeug.utils import secure_filename
 import os
@@ -24,14 +22,30 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 # CREATE UPLOAD FOLDER IF NOT EXISTS
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+
+ALLOWED_EXTENSIONS = {
+    "png",
+    "jpg",
+    "jpeg",
+    "gif",
+    "webp"
+}
+
+def allowed_file(filename):
+    return (
+        "." in filename and
+        filename.rsplit(".", 1)[1].lower()
+        in ALLOWED_EXTENSIONS
+    )
+
 # DATABASE CONNECTION
 try:
     conn = psycopg2.connect(
-        host="127.0.0.1",
-        database="testdb",
-        user="postgres",
-        password="Rodron30",
-        port="5432"
+        host=os.environ.get("DB_HOST"),
+        database=os.environ.get("DB_NAME"),
+        user=os.environ.get("DB_USER"),
+        password=os.environ.get("DB_PASSWORD"),
+        port=os.environ.get("DB_PORT", "5432")
     )
 
     conn.autocommit = False
@@ -42,8 +56,7 @@ try:
 except Exception as e:
     print("DATABASE CONNECTION ERROR:", e)
     raise
-
-# LOGIN
+#LOG IN
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
@@ -56,23 +69,18 @@ def login():
         password = request.form.get("password", "")
 
         cur.execute("""
-            SELECT id, username, role
+            SELECT id, username, password, role
             FROM "Inventory".users
             WHERE username = %s
             AND password = %s
-        """, (
-            username,
-            password
-        ))
+        """, (username, password))
 
         user = cur.fetchone()
 
         if user:
-
             session["user_id"] = user[0]
             session["user"] = user[1]
-            session["role"] = user[2]
-
+            session["role"] = user[3]
 
             return redirect("/")
 
@@ -82,12 +90,11 @@ def login():
         )
 
     return render_template("login.html")
-
-# LOGOUT
+#LOGOUT
 @app.route("/logout")
 def logout():
 
-        session.pop("user", None)
+        session.clear() 
 
         return redirect("/login")
 
@@ -116,6 +123,12 @@ def home():
         """)
 
     rows = cur.fetchall()
+
+    for row in rows:
+        print("ID:", row[0])
+        print("NAME:", row[1])
+        print("IMAGE:", row[3])
+        print("----------------")
 
     total_products = len(rows)
 
@@ -221,6 +234,7 @@ def add_product():
             "category", ""
         ).strip()
 
+        # VALIDATION
         if not product_name:
             return "Product name is required.", 400
 
@@ -243,7 +257,7 @@ def add_product():
             )
 
         except ValueError:
-            return "Invalid input.", 400
+            return "Invalid price or quantity.", 400
 
         if price < 0:
             return "Price cannot be negative.", 400
@@ -251,26 +265,31 @@ def add_product():
         if quantity < 0:
             return "Quantity cannot be negative.", 400
 
+        # DEFAULT IMAGE
         filename = "default.png"
 
         # IMAGE UPLOAD
-        if "image" in request.files:
+        image = request.files.get("image")
 
-            image = request.files["image"]
+        if image and image.filename:
 
-            if image and image.filename != "":
-
-                filename = (
-                    f"{uuid.uuid4()}_"
-                    f"{secure_filename(image.filename)}"
+            if not allowed_file(image.filename):
+                return (
+                    "Only PNG, JPG, JPEG, GIF and WEBP files are allowed.",
+                    400
                 )
 
-                image_path = os.path.join(
-                    app.config["UPLOAD_FOLDER"],
-                    filename
-                )
+            filename = (
+                f"{uuid.uuid4()}_"
+                f"{secure_filename(image.filename)}"
+            )
 
-                image.save(image_path)
+            image_path = os.path.join(
+                app.config["UPLOAD_FOLDER"],
+                filename
+            )
+
+            image.save(image_path)
 
         try:
 
@@ -304,6 +323,7 @@ def add_product():
 
     return render_template("add.html")
 
+
 # DELETE PRODUCT
 @app.route("/delete/<int:id>")
 def delete_product(id):
@@ -333,6 +353,7 @@ def delete_product(id):
 
             # DELETE IMAGE FILE AFTER SUCCESSFUL DB DELETE
             if result:
+
                 image_name = result[0]
 
                 if image_name and image_name != "default.png":
@@ -351,7 +372,6 @@ def delete_product(id):
             return "Database Error", 500
 
         return redirect("/")
-
 
 # EDIT PRODUCT
 @app.route("/edit/<int:id>", methods=["GET", "POST"])
@@ -379,7 +399,49 @@ def edit_product(id):
 
         image_name = result[0]
 
+        # NEW IMAGE UPLOAD
+        if "image" in request.files:
+
+            image = request.files["image"]
+
+            if image and image.filename != "":
+
+                if not allowed_file(image.filename):
+                    return (
+                        "Only PNG, JPG, JPEG, GIF and WEBP files are allowed.",
+                        400
+                    )
+                
+                filename = (
+                    f"{uuid.uuid4()}_"
+                    f"{secure_filename(image.filename)}"
+                )
+
+                image_path = os.path.join(
+                    app.config["UPLOAD_FOLDER"],
+                    filename
+                )
+
+                image.save(image_path)
+
+                # DELETE OLD IMAGE
+                if (
+                    image_name
+                    and image_name != "default.png"
+                ):
+
+                    old_path = os.path.join(
+                        app.config["UPLOAD_FOLDER"],
+                        image_name
+                    )
+
+                    if os.path.exists(old_path):
+                        os.remove(old_path)
+
+                image_name = filename
+
         try:
+
             cur.execute("""
                 UPDATE "Inventory".products
                 SET
@@ -399,8 +461,10 @@ def edit_product(id):
             conn.commit()
 
         except Exception as e:
+
             conn.rollback()
             print("EDIT PRODUCT ERROR:", e)
+
             return "Database Error", 500
 
         return redirect("/")
@@ -642,4 +706,4 @@ def transactions():
 
 # RUN APP
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)

@@ -1,69 +1,117 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     // =========================
+    // DATA
+    // =========================
+    let labels = JSON.parse(document.getElementById("chart-labels")?.textContent || "[]");
+    let data = JSON.parse(document.getElementById("chart-data")?.textContent || "[]");
+
+    // =========================
+    // TOP 5 ONLY
+    // =========================
+    let combined = labels.map((label, i) => ({
+        label: label,
+        value: data[i]
+    }));
+
+    combined.sort((a, b) => b.value - a.value);
+    combined = combined.slice(0, 5);
+
+    labels = combined.map(item => item.label);
+    data = combined.map(item => item.value);
+
+    // =========================
     // CHART
     // =========================
-    const labels = JSON.parse(document.getElementById("chart-labels").textContent);
-    const data = JSON.parse(document.getElementById("chart-data").textContent);
-
     const canvas = document.getElementById("productChart");
     const loader = document.getElementById("chartLoading");
 
-    canvas.style.opacity = 0;
+    if (canvas) {
 
-    new Chart(canvas, {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Products",
-                data: data,
-                backgroundColor: "rgba(59, 130, 246, 0.6)",
-                borderRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            animation: {
-                duration: 900
+        canvas.style.opacity = 0;
+
+        new Chart(canvas, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Top Products Stock",
+                    data: data,
+                    backgroundColor: "rgba(59, 130, 246, 0.6)",
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: "y",
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        suggestedMax: Math.max(...data) + 10
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
             }
+        });
+        if (loader) {
+            setTimeout(() => {
+                loader.style.opacity = "0";
+
+                setTimeout(() => {
+                    loader.style.display = "none";
+                    canvas.style.transition = "opacity 0.5s ease";
+                    canvas.style.opacity = "1";
+                }, 300);
+
+            }, 400);
         }
-    });
-
-    setTimeout(() => {
-        loader.style.opacity = 0;
-
-        setTimeout(() => {
-            loader.style.display = "none";
-            canvas.style.transition = "opacity 0.5s ease";
-            canvas.style.opacity = 1;
-        }, 300);
-
-    }, 400);
+    }
 
     // =========================
     // COUNTERS
     // =========================
-    const counters = document.querySelectorAll(".counter");
+    document.querySelectorAll(".counter").forEach(counter => {
 
-    counters.forEach(counter => {
-        counter.innerText = "0";
+        let target = parseInt(counter.getAttribute("data-target")) || 0;
+        let current = 0;
 
-        const updateCounter = () => {
-            const target = +counter.getAttribute("data-target");
-            const current = +counter.innerText;
+        let step = Math.ceil(target / 40);
 
-            const increment = Math.ceil(target / 30);
+        let interval = setInterval(() => {
+            current += step;
 
-            if (current < target) {
-                counter.innerText = current + increment;
-                setTimeout(updateCounter, 30);
-            } else {
+            if (current >= target) {
                 counter.innerText = target;
+                clearInterval(interval);
+            } else {
+                counter.innerText = current;
             }
-        };
-
-        updateCounter();
+        }, 20);
     });
 
 });
+
+// =========================
+// IMAGE MODAL
+// =========================
+function openImage(src) {
+    const modal = document.getElementById("imgModal");
+    const img = document.getElementById("modalImg");
+
+    if (modal && img) {
+        modal.style.display = "flex";
+        img.src = src;
+    }
+}
+
+function closeImage() {
+    const modal = document.getElementById("imgModal");
+    if (modal) {
+        modal.style.display = "none";
+    }
+}
